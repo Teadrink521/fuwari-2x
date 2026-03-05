@@ -373,6 +373,12 @@ $: {
 					.replace(/width="[^"]*"/g, "")
 					.replace(/height="[^"]*"/g, "");
 
+				// Force square rendering in preview: fill the square icon box consistently
+				processedSvg = processedSvg.replace(
+					/<svg\b([^>]*)>/,
+					'<svg$1 width="100%" height="100%" preserveAspectRatio="none">',
+				);
+
 				// Only replace fill with currentColor if we are NOT using original colors
 				if (!useOriginalIconColor) {
 					processedSvg = processedSvg.replace(
@@ -706,6 +712,8 @@ function downloadLink(url: string, filename: string) {
                         <div style="
                             width: {iconSize}px; 
                             height: {iconSize}px; 
+                            aspect-ratio: 1 / 1;
+                            flex-shrink: 0;
                             color: {useOriginalIconColor ? 'inherit' : iconColor}; 
                             filter: drop-shadow({iconShadow.x}px {iconShadow.y}px {iconShadow.blur}px {hexToRgba(iconShadow.color, iconShadow.alpha)});
                             display: flex;
@@ -717,7 +725,9 @@ function downloadLink(url: string, filename: string) {
                             {#if localIcon}
                                 <img src={localIcon} style="width: 100%; height: 100%; object-fit: contain;" alt="Local Icon" />
                             {:else}
-                                {@html iconSvg}
+                                <div class="icon-svg-box">
+                                    {@html iconSvg}
+                                </div>
                             {/if}
                         </div>
                     </div>
@@ -1316,5 +1326,15 @@ function downloadLink(url: string, filename: string) {
     }
     .text-gray-500 {
         color: #9ca3af !important; /* gray-400 */
+    }
+    .icon-svg-box {
+        width: 100%;
+        height: 100%;
+        aspect-ratio: 1 / 1;
+    }
+    .icon-svg-box :global(svg) {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
     }
 </style>
