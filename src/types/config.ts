@@ -92,6 +92,8 @@ export type UmamiConfig = {
 	timezone: string;
 };
 
+export type AiInvolvementLevel = 1 | 2 | 3 | 4 | 5;
+
 export type BlogPostData = {
 	body: string;
 	title: string;
@@ -100,6 +102,7 @@ export type BlogPostData = {
 	tags: string[];
 	draft?: boolean;
 	image?: string;
+	ai_level?: AiInvolvementLevel;
 	prevTitle?: string;
 	prevSlug?: string;
 	nextTitle?: string;
