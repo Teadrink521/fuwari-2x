@@ -60,7 +60,7 @@ ai_level: 1
 
 于是，这个小项目就这样诞生了：
 
-[afoim/process_watch2txt: 将当前运行的进程名称和需要监视的目标进程名称写入TXT中，以便在OBS Studio中导入以给观众呈现当前您的电脑正在使用的软件](https://github.com/afoim/process_watch2txt)
+::github{repo="afoim/process_watch2txt"}
 
 ![](../assets/images/WindowsTerminal_wV1C4TbD15.gif)
 
