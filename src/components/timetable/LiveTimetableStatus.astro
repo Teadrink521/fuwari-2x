@@ -14,7 +14,7 @@ const payloadText = encodeURIComponent(
 );
 ---
 
-<div class:list={["rounded-lg border border-white/10 bg-white/5 px-4 py-3", className]} data-live-status-root data-live-payload={payloadText}>
+<div class:list={["rounded-lg border border-white/10 bg-[var(--card-bg)] px-4 py-3", className]} data-live-status-root data-live-payload={payloadText}>
 	<p data-live-status class="text-sm font-semibold text-90">状态计算中...</p>
 	<p class="mt-1 text-sm text-75">
 		<span>下一堂课：</span>
@@ -188,5 +188,19 @@ const payloadText = encodeURIComponent(
 <style>
 	[data-live-next-detail] {
 		transition: color 0.2s ease;
+	}
+
+	.live-status-card {
+		background: linear-gradient(135deg, rgb(255 255 255 / 0.04), rgb(255 255 255 / 0.015)), var(--card-bg);
+		border-color: rgb(255 255 255 / 0.12);
+		box-shadow: 0 2px 10px rgb(0 0 0 / 0.12);
+		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+	}
+
+	.live-status-card:hover {
+		transform: translateY(-2px);
+		border-color: rgb(255 255 255 / 0.16);
+		background: linear-gradient(135deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.025)), var(--card-bg);
+		box-shadow: 0 12px 26px rgb(0 0 0 / 0.22);
 	}
 </style>
