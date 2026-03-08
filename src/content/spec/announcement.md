@@ -1,5 +1,5 @@
 ---
-enable: true
+enable: false
 level: happy
 ---
 你好，课表，有事请在没课的时候找我
