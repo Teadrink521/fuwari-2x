@@ -46,7 +46,7 @@ cd && mkdir -p fisco && cd fisco
 
 
 下载脚本
-```bash\
+```bash
 curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.11.0/build_chain.sh && chmod u+x build_chain.sh
 ```
 
