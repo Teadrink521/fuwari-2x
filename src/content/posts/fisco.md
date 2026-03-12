@@ -338,9 +338,15 @@ cd webase-deploy
 nano common.properties
 ```
 
-运行
+安装
 ```bash
 uv run deploy.py installAll
 ```
 
-# 未完待续
+启动
+```bash
+uv run deploy.py startAll
+```
+
+查看WebUI，端口 5000
+![](../assets/images/fisco-1.png)
