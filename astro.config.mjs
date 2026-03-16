@@ -5,8 +5,8 @@ import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import swup from "@swup/astro";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
-import { defineConfig } from "astro/config";
 import { defineConfig, passthroughImageService } from "astro/config";
+import { fileURLToPath } from "node:url";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeComponents from "rehype-components"; /* Render the custom directive content */
 import rehypeExternalLinks from "rehype-external-links";
@@ -315,6 +315,23 @@ export default defineConfig({
 		],
 	},
 	vite: {
+		resolve: {
+			alias: [
+				{
+					find: /^@iconify\/svelte$/,
+					replacement: fileURLToPath(
+						new URL("./node_modules/@iconify/svelte/dist/Icon.svelte", import.meta.url),
+					),
+				},
+				{
+					find: /^@iconify\/svelte\/dist\/Icon\.svelte$/,
+					replacement: fileURLToPath(
+						new URL("./node_modules/@iconify/svelte/dist/Icon.svelte", import.meta.url),
+					),
+				},
+			],
+			conditions: ["svelte"],
+		},
 		server: {
 		allowedHosts: ['2x.nz']
 	},

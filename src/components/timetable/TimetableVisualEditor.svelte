@@ -23,15 +23,9 @@ const dayLabels: Record<number, string> = {
 	7: "周日",
 };
 
-const visibleDays = viewModel.dayColumns.map((column) => column.day);
-const maxNode = Math.max(...viewModel.nodeRows.map((row) => row.node), 1);
-
-let baselineParsed: ParsedTimetableData;
-try {
-	baselineParsed = parseTimetableText(baselineText);
-} catch (error) {
-	throw new Error(error instanceof Error ? error.message : "课表基线数据解析失败");
-}
+let visibleDays: number[] = [];
+let maxNode = 1;
+let baselineParsed = parseBaselineText(baselineText);
 
 let editMode = false;
 let draftParsed = cloneParsedData(baselineParsed);
@@ -60,23 +54,41 @@ let arrangementCards: ArrangementCardGroup[] = [];
 let selectedArrangement: TimetableCourseArrangement | null = null;
 let selectedCourseName = "";
 
+$: visibleDays = viewModel.dayColumns.map((column) => column.day);
+$: maxNode = Math.max(...viewModel.nodeRows.map((row) => row.node), 1);
 $: arrangementCards = buildArrangementCards(previewViewModel, draftParsed.arrangements);
 $: selectedArrangement =
 	selectedArrangementRef === null
 		? null
 		: draftParsed.arrangements[selectedArrangementRef] ?? null;
-$: selectedCourseName = selectedArrangement
+$: selectedCourseName =
+	selectedArrangement
 	? draftParsed.courseDefinitions.find((course) => course.id === selectedArrangement?.id)
 			?.courseName || ""
 	: "";
 
+function parseBaselineText(text: string): ParsedTimetableData {
+	try {
+		return parseTimetableText(text);
+	} catch (error) {
+		throw new Error(error instanceof Error ? error.message : "课表基线数据解析失败");
+	}
+}
+
+function deepClone<T>(value: T): T {
+	if (typeof globalThis.structuredClone === "function") {
+		return globalThis.structuredClone(value);
+	}
+	return JSON.parse(JSON.stringify(value)) as T;
+}
+
 function cloneParsedData(data: ParsedTimetableData): ParsedTimetableData {
 	return {
-		config: structuredClone(data.config),
-		nodeTimes: structuredClone(data.nodeTimes),
-		meta: structuredClone(data.meta),
-		courseDefinitions: structuredClone(data.courseDefinitions),
-		arrangements: structuredClone(data.arrangements),
+		config: deepClone(data.config),
+		nodeTimes: deepClone(data.nodeTimes),
+		meta: deepClone(data.meta),
+		courseDefinitions: deepClone(data.courseDefinitions),
+		arrangements: deepClone(data.arrangements),
 	};
 }
 
@@ -267,6 +279,11 @@ function exportJson() {
 function getNumberValue(value: number | undefined): string {
 	return Number.isFinite(value) ? String(value) : "";
 }
+
+function getEventValue(event: Event): string {
+	const target = event.currentTarget as HTMLInputElement | HTMLSelectElement;
+	return target?.value ?? "";
+}
 </script>
 
 <div class="mb-5 flex items-center gap-2">
@@ -354,7 +371,7 @@ function getNumberValue(value: number | undefined): string {
 							type="text"
 							class="w-full rounded-lg border border-[var(--line-divider)] bg-[var(--card-bg)] px-3 py-2 text-sm"
 							value={selectedCourseName}
-							on:input={(event) => updateCourseName((event.currentTarget as HTMLInputElement).value)}
+							on:input={(event) => updateCourseName(getEventValue(event))}
 						/>
 					</label>
 
@@ -364,7 +381,7 @@ function getNumberValue(value: number | undefined): string {
 							type="text"
 							class="w-full rounded-lg border border-[var(--line-divider)] bg-[var(--card-bg)] px-3 py-2 text-sm"
 							value={selectedArrangement.teacher ?? ""}
-							on:input={(event) => updateSelectedArrangement("teacher", (event.currentTarget as HTMLInputElement).value)}
+							on:input={(event) => updateSelectedArrangement("teacher", getEventValue(event))}
 						/>
 					</label>
 
@@ -374,7 +391,7 @@ function getNumberValue(value: number | undefined): string {
 							type="text"
 							class="w-full rounded-lg border border-[var(--line-divider)] bg-[var(--card-bg)] px-3 py-2 text-sm"
 							value={selectedArrangement.room ?? ""}
-							on:input={(event) => updateSelectedArrangement("room", (event.currentTarget as HTMLInputElement).value)}
+							on:input={(event) => updateSelectedArrangement("room", getEventValue(event))}
 						/>
 					</label>
 
@@ -383,7 +400,7 @@ function getNumberValue(value: number | undefined): string {
 						<select
 							class="w-full rounded-lg border border-[var(--line-divider)] bg-[var(--card-bg)] px-3 py-2 text-sm"
 							value={getNumberValue(selectedArrangement.day)}
-							on:change={(event) => updateSelectedArrangement("day", (event.currentTarget as HTMLSelectElement).value)}
+							on:change={(event) => updateSelectedArrangement("day", getEventValue(event))}
 						>
 							{#each visibleDays as day}
 								<option value={day}>{dayLabels[day]}</option>
@@ -399,7 +416,8 @@ function getNumberValue(value: number | undefined): string {
 							max={String(maxNode)}
 							class="w-full rounded-lg border border-[var(--line-divider)] bg-[var(--card-bg)] px-3 py-2 text-sm"
 							value={getNumberValue(selectedArrangement.startNode)}
-							on:input={(event) => updateSelectedArrangement("startNode", (event.currentTarget as HTMLInputElement).value)}
+							on:input={(event) =>
+								updateSelectedArrangement("startNode", getEventValue(event))}
 						/>
 					</label>
 
@@ -412,7 +430,8 @@ function getNumberValue(value: number | undefined): string {
 								max={String(draftParsed.meta.maxWeek)}
 								class="w-full rounded-lg border border-[var(--line-divider)] bg-[var(--card-bg)] px-3 py-2 text-sm"
 								value={getNumberValue(selectedArrangement.startWeek)}
-								on:input={(event) => updateSelectedArrangement("startWeek", (event.currentTarget as HTMLInputElement).value)}
+								on:input={(event) =>
+									updateSelectedArrangement("startWeek", getEventValue(event))}
 							/>
 						</label>
 
@@ -424,7 +443,8 @@ function getNumberValue(value: number | undefined): string {
 								max={String(draftParsed.meta.maxWeek)}
 								class="w-full rounded-lg border border-[var(--line-divider)] bg-[var(--card-bg)] px-3 py-2 text-sm"
 								value={getNumberValue(selectedArrangement.endWeek)}
-								on:input={(event) => updateSelectedArrangement("endWeek", (event.currentTarget as HTMLInputElement).value)}
+								on:input={(event) =>
+									updateSelectedArrangement("endWeek", getEventValue(event))}
 							/>
 						</label>
 					</div>

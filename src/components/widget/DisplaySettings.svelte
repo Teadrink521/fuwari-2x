@@ -17,28 +17,33 @@ import {
 	setRainbowMode,
 	setRainbowSpeed,
 } from "@utils/setting-utils";
-import { onMount } from "svelte";
 
-let hue = 250;
-let isRainbowMode = false;
-let rainbowSpeed = 5;
-let bgBlur = 4;
-let hideBg = false;
-let isDevMode = false;
-let devServer = "";
-let isReady = false;
+const isBrowser = typeof document !== "undefined";
+const defaultHue = isBrowser ? getDefaultHue() : 250;
 
-const defaultHue = getDefaultHue();
+let hue = isBrowser ? getHue() : defaultHue;
+let isRainbowMode = isBrowser ? getRainbowMode() : false;
+let rainbowSpeed = isBrowser ? getRainbowSpeed() : 5;
+let bgBlur = isBrowser ? getBgBlur() : 4;
+let hideBg = isBrowser ? getHideBg() : false;
+let isDevMode = isBrowser ? getDevMode() : false;
+let devServer = isBrowser ? getDevServer() : "";
 
 function resetHue() {
 	hue = getDefaultHue();
+	if (!isRainbowMode) {
+		setHue(hue);
+	}
 }
 
-$: if (isReady && (hue || hue === 0) && !isRainbowMode) {
+function onHueChange() {
+	if (isRainbowMode || (!hue && hue !== 0)) {
+		return;
+	}
 	setHue(hue);
 }
 
-$: if (isReady) {
+function onBgBlurChange() {
 	setBgBlur(bgBlur);
 }
 
@@ -83,24 +88,13 @@ function onSpeedChange() {
 	}
 }
 
-onMount(() => {
-	hue = getHue();
-	isRainbowMode = getRainbowMode();
-	rainbowSpeed = getRainbowSpeed();
-	bgBlur = getBgBlur();
-	hideBg = getHideBg();
-	isDevMode = getDevMode();
-	devServer = getDevServer();
-	isReady = true;
-
-	if (isRainbowMode) {
-		document.documentElement.classList.add("is-rainbow-mode");
-		document.documentElement.style.setProperty(
-			"--rainbow-duration",
-			`${120 / rainbowSpeed}s`,
-		);
-	}
-});
+if (isBrowser && isRainbowMode) {
+	document.documentElement.classList.add("is-rainbow-mode");
+	document.documentElement.style.setProperty(
+		"--rainbow-duration",
+		`${120 / rainbowSpeed}s`,
+	);
+}
 </script>
 
 <div id="display-setting" class="float-panel float-panel-closed absolute transition-all w-80 right-4 px-4 py-4">
@@ -121,12 +115,14 @@ onMount(() => {
         </div>
         <div class="flex gap-1">
             <input aria-label="Hue Value" id="hueValue" type="number" min="0" max="360" bind:value={hue} disabled={isRainbowMode}
+                   on:input={onHueChange}
                    class="transition bg-[var(--btn-regular-bg)] w-12 h-7 rounded-md text-center font-bold text-sm text-[var(--btn-content)] outline-none"
             />
         </div>
     </div>
     <div class="w-full h-6 px-1 bg-[oklch(0.70_0.10_0)] rounded select-none mb-3">
         <input aria-label="主题色彩" type="range" min="0" max="360" bind:value={hue} disabled={isRainbowMode}
+               on:input={onHueChange}
                class="slider" id="colorSlider" step="1" style="width: 100%">
     </div>
 
@@ -187,6 +183,7 @@ onMount(() => {
     </div>
     <div class="w-full h-6 bg-[var(--btn-regular-bg)] rounded select-none overflow-hidden">
         <input aria-label="背景模糊" type="range" min="0" max="20" bind:value={bgBlur}
+               on:input={onBgBlurChange}
                class="slider" step="1" style="width: 100%; --value-percent: {bgBlur / 20 * 100}%">
     </div>
 
